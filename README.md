@@ -1,6 +1,6 @@
-# Philippine Financial Markets Comparison
+# Philippine Financial Instruments Comparison Dashboard
 
-Streamlit dashboard based on the provided Data and Sources screenshot, featuring a comparison of six instruments, JFC historical price context, and an editable hypothetical projection calculator.
+Interactive Streamlit dashboard for the user's Philippine financial markets final-exam project.
 
 ## Run locally
 
@@ -11,20 +11,17 @@ streamlit run app.py
 
 ## Deploy on Streamlit Community Cloud
 
-1. Go to [share.streamlit.io](https://share.streamlit.io/) and sign in with GitHub.
-2. Create a new app and select this repository, the `main` branch, and `app.py`.
-3. Deploy and wait for Streamlit to build the app.
-4. Copy the exact URL generated after a successful deployment into `4_Live_App_Link.txt`.
+1. Sign in at [share.streamlit.io](https://share.streamlit.io/) with the GitHub account that can access this repository.
+2. Create a new app and select this repository, branch `main`, and entry point `app.py`.
+3. Deploy. Wait for a successful build, then copy Streamlit's generated URL into `4_Live_App_Link.txt`.
 
-A live public link cannot be guessed or generated without completing deployment through the repository owner's Streamlit Community Cloud account. `4_Live_App_Link.txt` remains explicit that deployment is pending until then.
+A live public link cannot be guessed or created from repository files alone. Deployment requires authorization through the owner's Streamlit Community Cloud account. The link text file remains marked pending until the real URL is generated.
 
-## Included pages
+## Dashboard
 
-- **Overview & Comparison:** the six instruments and terms visible in the provided spreadsheet screenshot.
-- **Stock Analysis (JFC):** on-demand historical `JFC.PS` price chart and period change from Yahoo Finance. It is not a fundamental valuation.
-- **Comparison & Projection:** user-editable assumptions for hypothetical compounded values; outputs are not forecasts.
-- **Data and Sources:** source notes, the comparison table, and CSV download.
+- Instrument comparison table using the returns, volatility, fees, source labels, minimums, and classifications supplied in the user's dashboard brief.
+- Compound growth calculator with user-selectable principal and time horizon.
+- Return-versus-volatility scatter chart.
+- Educational disclaimer and data-verification cautions.
 
-## Data cautions
-
-Terms are transcribed from the user's screenshot, with a retrieval date of September 30, 2026, and have not been independently verified against current provider documentation. JFC price data is fetched from Yahoo Finance and can be delayed or incomplete. The raw compressed PDF streams provided in the conversation were not readable as assignment text, so any requirements not visible in the screenshot still need confirmation against the original workbook/PDF. Educational use only; not investment advice.
+**Important:** Performance figures were supplied in the user's prompt and have not been independently validated against the workbook. The calculator repeats a reported historical annual return as a hypothetical assumption; it is not a forecast. Verify figures and methodology against the original analysis workbook and source materials before submission.

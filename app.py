@@ -1,88 +1,150 @@
 from __future__ import annotations
 
-from datetime import date
-
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import yfinance as yf
 
-st.set_page_config(page_title="Philippine Financial Markets Comparison", page_icon="🇵🇭", layout="wide")
-st.title("🇵🇭 Philippine Financial Markets Comparison")
-st.caption("Compare the six instruments in the project’s Data and Sources sheet. Terms shown below are transcribed from the provided screenshot; verify them with each provider before investing.")
+st.set_page_config(
+    page_title="Philippine Financial Instruments Comparison",
+    page_icon="📊",
+    layout="wide",
+)
 
-AS_OF = "September 30, 2026"
-INSTRUMENTS = [
-    {"Instrument": "Bank Time Deposit", "Provider / Source Name": "BDO Unibank (1-Year Peso Time Deposit)", "Type": "Money Market", "Risk Classification": "Low Risk", "Annual Fees": "None", "Minimum Investment": "₱5,000.00", "Redemption Settlement": "At Maturity", "PDIC Insured?": "Yes (Up to ₱1M)"},
-    {"Instrument": "Treasury Bill", "Provider / Source Name": "Bureau of the Treasury (364-day T-Bill Auction)", "Type": "Money Market / Fixed Income", "Risk Classification": "Low Risk", "Annual Fees": "None (Auction)", "Minimum Investment": "₱50,000.00", "Redemption Settlement": "Secondary Market / Maturity", "PDIC Insured?": "No (Govt. Backed)"},
-    {"Instrument": "UITF", "Provider / Source Name": "BPI Asset Management (Philippine Equity Index Fund)", "Type": "Capital Market (Equity)", "Risk Classification": "High Risk", "Annual Fees": "1.00% p.a.", "Minimum Investment": "₱10,000.00", "Redemption Settlement": "T + 3 Business Days", "PDIC Insured?": "No"},
-    {"Instrument": "Mutual Fund", "Provider / Source Name": "First Metro Philippine Equity Fund, Inc.", "Type": "Capital Market (Equity)", "Risk Classification": "High Risk", "Annual Fees": "1.50% p.a.", "Minimum Investment": "₱5,000.00", "Redemption Settlement": "T + 7 Business Days", "PDIC Insured?": "No"},
-    {"Instrument": "Insurance Fund (VUL)", "Provider / Source Name": "Sun Life Grepa Financial (Sun MaxiLink Prime)", "Type": "Capital Market (Balanced)", "Risk Classification": "Moderate to High", "Annual Fees": "2.00% p.a.", "Minimum Investment": "₱2,000 / month", "Redemption Settlement": "T + 5 to 7 Business Days", "PDIC Insured?": "No"},
-    {"Instrument": "Stock", "Provider / Source Name": "Philippine Stock Exchange (Jollibee Foods Corp. - JFC)", "Type": "Capital Market (Equity)", "Risk Classification": "High Risk", "Annual Fees": "Brokerage Comm. (~0.25%)", "Minimum Investment": "1 Board Lot (Current Price)", "Redemption Settlement": "T + 2 Business Days", "PDIC Insured?": "No"},
-]
-terms = pd.DataFrame(INSTRUMENTS)
+st.title("📊 Philippine Financial Instruments Comparison Dashboard")
+st.markdown("### Final Examination Project | BSMA – Financial Markets")
+st.markdown("**As of date:** September 30, 2026")
+st.caption(
+    "Dashboard values below are transcribed from the project materials supplied by the user. "
+    "Check the analysis workbook and original sources before submission; figures have not been independently audited."
+)
+st.divider()
 
-comparison_tab, analysis_tab, projection_tab, sources_tab = st.tabs(["Overview & Comparison", "Stock Analysis (JFC)", "Comparison & Projection", "Data and Sources"])
+# Performance and risk figures below were supplied in the user's Gemini-generated
+# dashboard brief. They are presented as reported historical figures, not forecasts.
+data = {
+    "Instrument": [
+        "1. Bank Time Deposit",
+        "2. Treasury Bill (364-day)",
+        "3. UITF (BPI Equity Index)",
+        "4. Mutual Fund (First Metro Equity)",
+        "5. Insurance VUL (Sun Life)",
+        "6. Stock (Jollibee – JFC)",
+    ],
+    "Category": ["Money Market", "Money Market", "Capital Market", "Capital Market", "Capital Market", "Capital Market"],
+    "Annual Return": [0.0535, 0.0575, 0.1240, 0.1180, 0.0950, 0.2288],
+    "Risk (Volatility)": [0.0050, 0.0010, 0.1850, 0.1790, 0.1120, 0.2245],
+    "Excess Return (vs T-Bill)": [-0.0040, 0.0000, 0.0665, 0.0605, 0.0375, 0.1713],
+    "Return-to-Risk Ratio": [np.nan, np.nan, 0.3595, 0.3380, 0.3348, 0.7630],
+    "Risk Classification": ["Low Risk", "Low Risk", "High Risk", "High Risk", "Moderate to High", "High Risk"],
+    "Annual Fees": ["None", "None (Auction)", "1.00% p.a.", "1.50% p.a.", "2.00% p.a.", "Brokerage (~0.25%)"],
+    "Min. Investment": ["₱5,000", "₱50,000", "₱10,000", "₱5,000", "₱2,000 / month", "1 Board Lot"],
+    "Source": ["BDO Unibank", "Bureau of the Treasury", "BPI Asset Management", "First Metro Funds", "Sun Life Grepa", "PSE / Jollibee Foods Corp."],
+    "Retrieval Date": ["September 30, 2026"] * 6,
+}
+df = pd.DataFrame(data)
+
+comparison_tab, calculator_tab, chart_tab = st.tabs(
+    ["📋 Instrument Comparison Table", "🧮 Compound Growth Calculator", "📈 Return vs. Risk Chart"]
+)
 
 with comparison_tab:
-    st.subheader("Compare the instruments")
-    st.dataframe(terms, use_container_width=True, hide_index=True)
-    st.info("Risk labels, minimums, costs, and settlement terms are copied from the supplied project screenshot (retrieval date: September 30, 2026). They are not live-verified. Confirm current terms directly with the named institution.")
-    st.markdown("**Quick take:** The source classifies the time deposit and Treasury bill as low risk, with equities, equity funds, and VUL carrying higher risk. Deposit insurance is shown only for the bank deposit (subject to the listed limit); Treasury bills are marked government-backed, not PDIC-insured. Past performance and capital protection are not implied by these labels.")
+    st.subheader("Comparison of Philippine Financial Instruments")
+    st.write(
+        "Reported annual returns, annualized volatility, excess returns relative to the 364-day "
+        "Treasury bill (listed at 5.75%), fees, and minimum investment requirements."
+    )
+    display_df = df.copy()
+    for column in ["Annual Return", "Risk (Volatility)", "Excess Return (vs T-Bill)"]:
+        display_df[column] = display_df[column].map(lambda value: f"{value:.2%}")
+    display_df["Return-to-Risk Ratio"] = display_df["Return-to-Risk Ratio"].map(
+        lambda value: f"{value:.4f}" if pd.notna(value) else "N/A"
+    )
+    st.dataframe(display_df, use_container_width=True, hide_index=True)
+    st.caption(
+        "Values were supplied in the user's dashboard brief and should be reconciled with "
+        "2_Financial_Analysis.xlsx and source documents. Ratios and return definitions may depend "
+        "on the workbook's methodology."
+    )
 
-with analysis_tab:
-    st.subheader("Jollibee Foods Corporation (PSE: JFC)")
-    st.write("The source identifies JFC as the stock example. Historical prices are fetched from Yahoo Finance when available; this is market-price context, not a complete fundamental analysis or a recommendation.")
-    period = st.selectbox("Price history", ["6 months", "1 year", "2 years", "5 years"], index=1, key="jfc_period")
-    period_map = {"6 months": "6mo", "1 year": "1y", "2 years": "2y", "5 years": "5y"}
-    try:
-        history = yf.Ticker("JFC.PS").history(period=period_map[period], auto_adjust=True)
-        closes = history["Close"].dropna() if not history.empty and "Close" in history else pd.Series(dtype=float)
-        if closes.empty:
-            st.warning("JFC.PS price history is currently unavailable. Try again later; confirm prices with the PSE or your broker.")
-        else:
-            price_df = pd.DataFrame({"Date": pd.to_datetime(closes.index).tz_localize(None), "Adjusted close (PHP)": closes.to_numpy()})
-            first_price, last_price = float(closes.iloc[0]), float(closes.iloc[-1])
-            pct = (last_price / first_price - 1) * 100 if first_price else 0
-            a, b, c = st.columns(3)
-            a.metric("Latest adjusted close", f"₱{last_price:,.2f}")
-            b.metric("Change over displayed period", f"{pct:+.2f}%")
-            c.metric("Observations", f"{len(closes):,}")
-            st.plotly_chart(px.line(price_df, x="Date", y="Adjusted close (PHP)", title="JFC adjusted historical price"), use_container_width=True)
-            st.caption("Source: Yahoo Finance symbol JFC.PS, retrieved when this page loads. Historical return excludes dividends, taxes, and transaction costs; prices may be delayed or incomplete.")
-    except Exception as exc:
-        st.warning(f"Could not retrieve JFC price data: {exc}. Confirm market data with the PSE or your broker.")
-    st.markdown("**Risk reminder:** A single stock can lose value and is not PDIC-insured. This dashboard does not calculate valuation ratios or company financial-statement metrics because those data and instructions were not present in the supplied screenshot.")
+with calculator_tab:
+    st.subheader("🧮 Interactive Future Value Calculator")
+    st.caption(
+        "Illustration assuming the selected reported annual return repeats unchanged each year. "
+        "This is a hypothetical scenario, not an expected or guaranteed return."
+    )
+    left, right = st.columns(2)
+    with left:
+        principal = st.number_input(
+            "Initial principal (₱)",
+            min_value=1_000.0,
+            max_value=10_000_000.0,
+            value=100_000.0,
+            step=5_000.0,
+            format="%.2f",
+        )
+        years = st.slider("Investment horizon (years)", min_value=1, max_value=30, value=5)
+    with right:
+        selected = st.selectbox("Financial instrument", df["Instrument"].tolist())
 
-with projection_tab:
-    st.subheader("Illustrative investment projection")
-    st.write("Set your own annual return assumptions. The source screenshot does not provide expected returns, so this tool does not invent forecasts. Values are hypothetical, not guaranteed.")
-    amount = st.number_input("Initial amount (PHP)", min_value=0.0, value=50000.0, step=5000.0, format="%.2f")
-    years = st.slider("Investment horizon (years)", 1, 30, 5)
-    selected = st.multiselect("Instruments", terms["Instrument"].tolist(), default=terms["Instrument"].tolist())
-    assumptions = {}
-    grid = st.columns(3)
-    for i, instrument in enumerate(selected):
-        assumptions[instrument] = grid[i % 3].number_input(f"{instrument}: assumed annual gross return (%)", min_value=-100.0, max_value=100.0, value=0.0, step=0.5, key=f"rate_{instrument}")
-    fee_rates = {"Bank Time Deposit": 0.0, "Treasury Bill": 0.0, "UITF": 1.0, "Mutual Fund": 1.5, "Insurance Fund (VUL)": 2.0, "Stock": 0.25}
-    rows = []
-    for instrument, gross_pct in assumptions.items():
-        fee_pct = fee_rates[instrument]
-        net_pct = gross_pct - fee_pct
-        end_value = amount * (1 + net_pct / 100) ** years
-        rows.append({"Instrument": instrument, "Assumed gross return (%/yr)": gross_pct, "Fee estimate (%/yr)": fee_pct, "Illustrative net return (%/yr)": net_pct, "Starting amount (PHP)": amount, "Value after horizon (PHP)": end_value, "Illustrative gain / loss (PHP)": end_value - amount})
-    if rows:
-        result = pd.DataFrame(rows)
-        st.dataframe(result.style.format({"Assumed gross return (%/yr)": "{:.2f}%", "Fee estimate (%/yr)": "{:.2f}%", "Illustrative net return (%/yr)": "{:.2f}%", "Starting amount (PHP)": "₱{:,.2f}", "Value after horizon (PHP)": "₱{:,.2f}", "Illustrative gain / loss (PHP)": "₱{:,.2f}"}), use_container_width=True, hide_index=True)
-        chart = px.bar(result, x="Instrument", y="Value after horizon (PHP)", color="Instrument", title="Hypothetical value at end of horizon")
-        st.plotly_chart(chart, use_container_width=True)
-    st.caption("Formula: ending value = initial amount × (1 + (assumed gross annual return − listed annual fee) / 100) ^ years. This simplified estimate excludes taxes, inflation, trading costs, changing fees, contributions, VUL insurance charges, and differences in payout/settlement. Stock brokerage is a transaction commission, not an annual management fee; its 0.25% is shown only as a rough single-rate comparison and is not compounded as a recurring annual charge. Treasury bill auction yield is not a management fee.")
+    row = df.loc[df["Instrument"] == selected].iloc[0]
+    rate = float(row["Annual Return"])
+    if principal <= 0 or not np.isfinite(principal):
+        st.error("Enter a valid positive principal amount.")
+    elif rate <= -1:
+        st.error("The selected annual return must be greater than -100% for this calculation.")
+    else:
+        years_range = np.arange(years + 1)
+        values = principal * np.power(1 + rate, years_range)
+        future_values = pd.DataFrame({"Year": years_range, "Illustrative Value (₱)": values})
+        final_value = float(values[-1])
+        st.metric(
+            label=f"Illustrative value after {years} years",
+            value=f"₱{final_value:,.2f}",
+            delta=f"Change from principal: ₱{final_value - principal:,.2f}",
+        )
+        growth_fig = px.line(
+            future_values,
+            x="Year",
+            y="Illustrative Value (₱)",
+            title=f"Illustrative growth for {selected}",
+            markers=True,
+        )
+        st.plotly_chart(growth_fig, use_container_width=True)
+        st.caption(
+            f"Formula: principal × (1 + {rate:.2%})^years. The calculation does not deduct fees, "
+            "taxes, inflation, trading costs, insurance charges, or other product-specific costs."
+        )
 
-with sources_tab:
-    st.subheader("Data and Sources")
-    st.dataframe(terms, use_container_width=True, hide_index=True)
-    st.markdown("**Retrieval date shown in supplied screenshot:** September 30, 2026. **JFC historical price source:** Yahoo Finance, ticker `JFC.PS`, fetched on demand. **Terms source:** user's screenshot of the workbook's Data and Sources sheet; original provider documents were not independently checked. The exact four-page Financial Analysis PDF was supplied as compressed PDF object data, not readable text, and its other worksheets/instructions could not be verified.")
-    st.download_button("Download comparison table (CSV)", terms.to_csv(index=False).encode("utf-8"), "philippine-financial-instruments.csv", "text/csv")
+with chart_tab:
+    st.subheader("📈 Risk–Return Spectrum")
+    st.caption("Reported annual return and annualized volatility figures; verify their calculation period and methodology against the workbook.")
+    chart_data = df.copy()
+    chart_data["Annual Return (%)"] = chart_data["Annual Return"] * 100
+    chart_data["Annualized Volatility (%)"] = chart_data["Risk (Volatility)"] * 100
+    risk_fig = px.scatter(
+        chart_data,
+        x="Annualized Volatility (%)",
+        y="Annual Return (%)",
+        text="Instrument",
+        color="Category",
+        hover_data=["Risk Classification", "Excess Return (vs T-Bill)", "Source"],
+        title="Reported return vs. volatility",
+        labels={
+            "Annualized Volatility (%)": "Annualized volatility (%) — risk proxy",
+            "Annual Return (%)": "Reported annual return (%)",
+        },
+    )
+    risk_fig.update_traces(textposition="top center")
+    risk_fig.update_layout(legend_title_text="Category")
+    st.plotly_chart(risk_fig, use_container_width=True)
 
 st.divider()
-st.caption("For educational purposes only; not financial, investment, tax, or legal advice. Verify product terms and market data with the institution, PSE, Bureau of the Treasury, or other official source before acting.")
+st.warning(
+    "⚠️ **Educational disclaimer:** Past performance is not a guarantee of future results. "
+    "This dashboard is for academic and educational purposes only and is not financial advice. "
+    "Bank deposits may be PDIC-insured subject to applicable limits and requirements; UITFs, "
+    "mutual funds, VUL investments, Treasury bills, and listed shares are not PDIC-insured deposits. "
+    "Confirm current coverage, terms, fees, and all figures with authoritative sources."
+)
+st.caption("Sources listed in the comparison table are source labels from the supplied project materials; the live dashboard does not independently verify them.")
